@@ -1,5 +1,13 @@
-import '@/styles/globals.css'
+import { ProviderAuth } from '@/hooks/useAuth'
+import MainLayout from '@/layout/Main.Layout'
+import '@styles/tailwind.css'
 
 export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return (<>
+    <ProviderAuth>
+    <MainLayout>
+      <Component {...pageProps} />
+    </MainLayout>
+    </ProviderAuth>
+  </>)
 }

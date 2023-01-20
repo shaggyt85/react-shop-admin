@@ -1,15 +1,43 @@
 
-import {  useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/20/solid';
+import FormProduct from '@/components/FormProducts';
+import endPoints from '@/services/api';
 import Modal from '@common/Modal';
 import Image from 'next/image';
+import useAlert from '@/hooks/useAlert';
+import Alert from '@/common/Alert';
+import Link from 'next/link';
+import { deleteProduct } from '@/services/api/product';
 
-export default function products() {
+const products = () => {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
+  const { alert, setAlert, toggleAlert } = useAlert();
+
+  useEffect(() => {
+    async function getProduct(){
+      const response = await fetch(endPoints.products.addProducts)
+      const data = await response.json();
+      setProducts(data)
+    }
+    getProduct()
+  }, [alert]);
+
+  const handleDelete = (id) => {
+    deleteProduct(id).then(() => {
+      setAlert({
+        active: true,
+        message: 'Delete product successfully',
+        type: 'error',
+        autoClose: true,
+      });
+    });
+  };
 
   return (
     <>
+    <Alert alert={alert} handleClose={toggleAlert} />
       <div className="lg:flex lg:items-center lg:justify-between mb-8">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">List of Products</h2>
@@ -56,7 +84,7 @@ export default function products() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {products?.map((product) => (
+                  {products.map((product) => (
                     <tr key={`Product-item-${product.id}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -76,14 +104,12 @@ export default function products() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="/edit" className="text-indigo-600 hover:text-indigo-900">
+                        <Link href={`/dashboard/edit/${product.id}`} className="text-indigo-600 hover:text-indigo-900">
                           Edit
-                        </a>
+                        </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="/edit" className="text-indigo-600 hover:text-indigo-900">
-                          Delete
-                        </a>
+                        <PlusIcon className='flex-shrink-0 h6 w-6 text-gray-400 cursor-pointer' aria-hidden="true" onClick={() => handleDelete(product.id)} />
                       </td>
                     </tr>
                   ))}
@@ -94,8 +120,10 @@ export default function products() {
         </div>
       </div>
       <Modal open={open} setOpen={setOpen}>
-        <h1>Hola Mundo</h1>
+        <FormProduct setOpen={setOpen}  setAlert={setAlert} />
       </Modal>
     </>
   );
 }
+
+export default products;

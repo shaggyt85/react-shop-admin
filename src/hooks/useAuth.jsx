@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useContext, createContext } from "react";
 import endPoints from "@services/api";
 import Cookies from "js-cookie";
@@ -28,38 +29,48 @@ function useProvideAuth() {
                 password: password,
             }),
         };
-            const response = await fetch(endPoints.auth.login, options)
+        const response = await fetch(endPoints.auth.login, options)
             .then((res) => res.json());
-            const { access_token } = response;
-            if (access_token) {
-                const token = access_token;
-                Cookies.set("token", token, { expires: 1 });
+        const { access_token } = response;
+        if (access_token) {
+            const token = access_token;
+            Cookies.set("token", token, { expires: 1 });
 
-                const options = {
-                    method: "GET",
-                    headers: {
-                        accept: "*/*",
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                };
+            const options = {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            };
 
-                const  user  = await fetch(endPoints.auth.profile, options)
-                    .then((res) => res.json())
-                    .then((user) => {
-                        return setUser(user);
-                        // setUser(data);
-                    });                   
-            } else {
-                setError(response.message);
-            }
-        
-}
+            const user = await fetch(endPoints.auth.profile, options)
+                .then((res) => res.json())
+                .then((user) => {
+
+                    return setUser(user);
+                    // setUser(data);
+                });
+        } else {
+            setError(response.message);
+            console.log(user)
+        }
+    }
+
+    const logout = () => {
+        Cookies.remove('token')
+        setUser(null)
+        // delete fetch.defaults.headers['Authorization']
+        window.location.href = '/login'
+    }
+
 
     return {
         user,
         signIn,
         error,
         setError,
+        logout
     }
 }
